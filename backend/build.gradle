@@ -62,6 +62,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    /* ---------- dotenv ---------- */
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
     /* ---------- Dev ---------- */
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
