@@ -62,6 +62,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    /* ---------- JSON ---------- */
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     /* ---------- dotenv ---------- */
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 

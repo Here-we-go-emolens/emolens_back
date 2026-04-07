@@ -6,11 +6,13 @@ import hwan.project2.domain.member.Member;
 import hwan.project2.domain.member.repo.MemberRepository;
 import hwan.project2.exception.auth.MemberNotFoundException;
 import hwan.project2.exception.diary.DiaryNotFoundException;
+import hwan.project2.service.ai.DiaryCreatedEvent;
 import hwan.project2.web.dto.diary.DiaryCreateRequest;
 import hwan.project2.web.dto.diary.DiaryListItemResponse;
 import hwan.project2.web.dto.diary.DiaryResponse;
 import hwan.project2.web.dto.diary.DiaryUpdateRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long createDiary(Long memberId, DiaryCreateRequest req) {
@@ -36,7 +39,9 @@ public class DiaryService {
         if (req.imageUrls() != null && !req.imageUrls().isEmpty()) {
             diary.addImages(req.imageUrls());
         }
-        return diaryRepository.save(diary).getId();
+        Long diaryId = diaryRepository.save(diary).getId();
+        eventPublisher.publishEvent(new DiaryCreatedEvent(diaryId)); // 커밋 후 AI 분석 트리거
+        return diaryId;
     }
 
     public DiaryResponse getDiary(Long memberId, Long diaryId) {

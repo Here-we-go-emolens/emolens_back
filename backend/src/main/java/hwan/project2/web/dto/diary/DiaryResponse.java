@@ -15,8 +15,10 @@ public record DiaryResponse(
         boolean isSecret,
         String status,
         LocalDateTime createdAt,
+        String feedback,
         List<EmotionResponse> emotions,
         List<String> keywords,
+        List<RecommendationResponse> recommendations,
         List<String> imageUrls
 ) {
     public static DiaryResponse from(Diary diary) {
@@ -29,11 +31,15 @@ public record DiaryResponse(
                 diary.isSecret(),
                 diary.getStatus().name(),
                 diary.getCreatedAt(),
+                diary.getFeedback(),
                 diary.getEmotions().stream()
                         .map(e -> new EmotionResponse(e.getEmotionName(), e.getScore()))
                         .toList(),
                 diary.getKeywords().stream()
                         .map(k -> k.getWord())
+                        .toList(),
+                diary.getRecommendations().stream()
+                        .map(r -> new RecommendationResponse(r.getType(), r.getContent()))
                         .toList(),
                 diary.getImages().stream()
                         .map(img -> img.getImageUrl())

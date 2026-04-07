@@ -1,11 +1,13 @@
 package hwan.project2.domain.diary.repo;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import hwan.project2.domain.diary.AnalysisStatus;
 import hwan.project2.domain.diary.Diary;
 import hwan.project2.domain.diary.QDiary;
 import hwan.project2.domain.diary.QDiaryEmotion;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,5 +63,24 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom {
                 .fetchOne();
 
         return count != null ? count : 0L;
+    }
+
+    /**
+     * PENDING/FAILED 상태이고 생성된 지 5분 이상 지난 일기 조회.
+     * ANALYZING 중인 건 건드리지 않음 (현재 처리 중일 수 있음).
+     * 5분 버퍼: 방금 생성된 일기가 아직 분석 중인 경우를 제외하기 위함.
+     */
+    @Override
+    public List<Diary> findUnanalyzed(int limit) {
+        QDiary diary = QDiary.diary;
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
+
+        return queryFactory
+                .selectFrom(diary)
+                .where(diary.status.in(AnalysisStatus.PENDING, AnalysisStatus.FAILED)
+                        .and(diary.createdAt.before(threshold)))
+                .orderBy(diary.createdAt.asc())
+                .limit(limit)
+                .fetch();
     }
 }

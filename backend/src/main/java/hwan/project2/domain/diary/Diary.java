@@ -2,6 +2,7 @@ package hwan.project2.domain.diary;
 
 
 import hwan.project2.domain.member.Member;
+import hwan.project2.service.ai.dto.AnalysisResult;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +39,10 @@ public class Diary {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private AnalysisStatus status; // [PENDING, ANALYZING, COMPLETED]
+    private AnalysisStatus status; // [PENDING, ANALYZING, COMPLETED, FAILED]
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback; // AI 즉각 피드백 (one-liner)
 
     private LocalDateTime createdAt;
 
@@ -51,6 +55,11 @@ public class Diary {
     @BatchSize(size = 100)
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryKeyword> keywords = new ArrayList<>();
+
+    // 추천 리스트 (1:N)
+    @BatchSize(size = 10)
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DiaryRecommendation> recommendations = new ArrayList<>();
 
     // 이미지 리스트 (1:N)
     @BatchSize(size = 30)
@@ -87,6 +96,31 @@ public class Diary {
     public void updateImages(List<String> imageUrls) {
         this.images.clear();
         addImages(imageUrls);
+    }
+
+    public void startAnalyzing() {
+        this.status = AnalysisStatus.ANALYZING;
+    }
+
+    public void completeAnalysis(AnalysisResult result) {
+        // 재시도 시 이전 결과 제거 후 새로 저장 (중복 방지)
+        this.emotions.clear();
+        this.keywords.clear();
+        this.recommendations.clear();
+        result.emotions().forEach(e ->
+                this.emotions.add(DiaryEmotion.create(this, e.name(), e.score())));
+        result.keywords().forEach(w ->
+                this.keywords.add(DiaryKeyword.create(this, w)));
+        if (result.recommendations() != null) {
+            result.recommendations().forEach(r ->
+                    this.recommendations.add(DiaryRecommendation.create(this, r.type(), r.content())));
+        }
+        this.feedback = result.oneLiner();
+        this.status = AnalysisStatus.COMPLETED;
+    }
+
+    public void failAnalysis() {
+        this.status = AnalysisStatus.FAILED;
     }
 
     @PrePersist

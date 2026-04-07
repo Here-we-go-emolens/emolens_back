@@ -14,4 +14,7 @@ public interface DiaryRepositoryCustom {
     List<Diary> findByMemberIdOrderByDateDesc(Long memberId, long offset, int limit);
 
     long countByMemberId(Long memberId);
+
+    /** 분석 미완료 일기 조회 (PENDING/FAILED) - 재시도 스케줄러용 */
+    List<Diary> findUnanalyzed(int limit);
 }
