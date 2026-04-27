@@ -41,6 +41,12 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private Role role;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int chatUsed = 0;
+
+    @Column(length = 7)
+    private String chatMonth;
+
     public static Member createLocal(String name, String tag, String email, String encodedPassword, String profileImageUrl) {
         Member member = new Member();
         member.name = name;
@@ -63,6 +69,22 @@ public class Member extends BaseTimeEntity {
         member.status = MemberStatus.ACTIVE;
         member.role = Role.ROLE_USER;
         return member;
+    }
+
+    public void incrementChatUsed(String currentMonth) {
+        if (!currentMonth.equals(this.chatMonth)) {
+            this.chatUsed = 0;
+            this.chatMonth = currentMonth;
+        }
+        this.chatUsed++;
+    }
+
+    public int getChatLimit() {
+        return 10;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
     }
 
     public void updateProfileImage(String profileImageUrl) {

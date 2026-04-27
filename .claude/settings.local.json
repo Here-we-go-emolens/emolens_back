@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew test:*)",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :8080\")",
+      "Bash(cmd.exe:*)",
+      "Bash(netstat -ano)",
+      "Bash(curl:*)"
+    ]
+  }
+}

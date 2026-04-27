@@ -129,6 +129,18 @@ public class AuthService {
         }
     }
 
+    public Member getMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
+    @Transactional
+    public void updateProfile(Long memberId, String name) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+        member.updateName(name);
+    }
+
     private String refreshKey(Long memberId) {
         return "RT:" + memberId;
     }

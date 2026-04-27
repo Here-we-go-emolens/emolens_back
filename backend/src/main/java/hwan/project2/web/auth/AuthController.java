@@ -1,5 +1,6 @@
 package hwan.project2.web.auth;
 
+import hwan.project2.domain.member.Member;
 import hwan.project2.security.UserPrincipal;
 import hwan.project2.service.auth.AuthService;
 import hwan.project2.web.dto.*;
@@ -53,12 +54,16 @@ public class AuthController {
 
     @GetMapping("/me")
     public MeResponse me(@AuthenticationPrincipal UserPrincipal principal) {
+        Member member = authService.getMember(principal.getId());
         return new MeResponse(
-                principal.getId(),
-                principal.getEmail(),
-                principal.getDisplayName(),
-                principal.getRole().name(),
-                principal.getProfileImageUrl()
+                member.getId(),
+                member.getEmail(),
+                member.getName(),
+                member.getTag(),
+                member.getRole().name(),
+                member.getProfileImageUrl(),
+                member.getChatUsed(),
+                member.getChatLimit()
         );
     }
 

@@ -29,10 +29,49 @@ public class OpenAiClient {
     @Value("${openai.model.analysis}")
     private String analysisModel;
 
+    @Value("${openai.model.chat}")
+    private String chatModel;
+
+    @Value("${openai.model.diary-generate}")
+    private String diaryGenerateModel;
+
     public OpenAiClient(@Value("${openai.base-url}") String baseUrl) {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
+    }
+
+    public String chat(List<Map<String, String>> messages) {
+        return callCompletions(chatModel, messages, false);
+    }
+
+    public String generateDiary(List<Map<String, String>> messages) {
+        return callCompletions(diaryGenerateModel, messages, true);
+    }
+
+    private String callCompletions(String model, List<Map<String, String>> messages, boolean jsonMode) {
+        var bodyBuilder = new java.util.LinkedHashMap<String, Object>();
+        bodyBuilder.put("model", model);
+        bodyBuilder.put("messages", messages);
+        if (jsonMode) bodyBuilder.put("response_format", Map.of("type", "json_object"));
+
+        String responseBody = restClient.post()
+                .uri("/chat/completions")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(bodyBuilder)
+                .retrieve()
+                .body(String.class);
+
+        try {
+            JsonNode root = objectMapper.readTree(responseBody);
+            if (root.has("error")) {
+                throw new RuntimeException("OpenAI 오류: " + root.path("error").path("message").asText());
+            }
+            return root.path("choices").get(0).path("message").path("content").asText();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("OpenAI 응답 파싱 실패", e);
+        }
     }
 
     public AnalysisResult analyze(String systemPrompt, String userPrompt) {

@@ -45,6 +45,7 @@ public class SecurityConfig {
     ) throws Exception {
 
         http.csrf(csrf -> csrf.disable());
+        http.cors(cors -> {});
         // OAuth2 Authorization Code flow stores state between redirects.
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 

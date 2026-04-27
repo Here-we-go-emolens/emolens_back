@@ -2,6 +2,8 @@ openai:
   api-key: ${OPENAI_API_KEY}
   model:
     analysis: gpt-4o-mini
+    chat: gpt-4o-mini
+    diary-generate: gpt-4o
     report: gpt-4o
   base-url: https://api.openai.com/v1
 
@@ -17,6 +19,15 @@ logging:
   level:
     hwan.project2.security.jwt: DEBUG
 
+app:
+  frontend-url: http://localhost:5173
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+
 spring:
   data:
     redis:
@@ -25,7 +36,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 
   security:
     oauth2:
