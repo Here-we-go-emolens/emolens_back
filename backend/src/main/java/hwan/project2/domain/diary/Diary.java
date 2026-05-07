@@ -54,6 +54,12 @@ public class Diary {
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryEmotion> emotions = new ArrayList<>();
 
+    // 사용자 선택 감정 리스트 (1:N) — AI 분석 감정과 비교용
+    @BatchSize(size = 100)
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("emotionOrder ASC")
+    private List<DiaryUserEmotion> userEmotions = new ArrayList<>();
+
     // 키워드 리스트 (1:N) — 주간 분석의 핵심 재료
     @BatchSize(size = 100)
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -90,6 +96,10 @@ public class Diary {
         this.weather = weather;
         this.templateType = templateType != null ? templateType : TemplateType.PLAIN;
         this.isSecret = isSecret;
+    }
+
+    public void addUserEmotions(List<DiaryUserEmotion> emotions) {
+        this.userEmotions.addAll(emotions);
     }
 
     public void addImages(List<String> imageUrls) {

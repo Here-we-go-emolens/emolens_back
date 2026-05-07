@@ -128,7 +128,7 @@ public class ChatService {
             String content = node.path("content").asText("");
 
             DiaryCreateRequest req = new DiaryCreateRequest(
-                    title, content, LocalDate.now(), null, null, false, List.of()
+                    title, content, LocalDate.now(), null, null, false, List.of(), List.of()
             );
             return diaryService.createDiary(memberId, req);
         } catch (Exception e) {

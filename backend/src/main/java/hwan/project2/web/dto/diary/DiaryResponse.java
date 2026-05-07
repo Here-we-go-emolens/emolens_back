@@ -18,6 +18,7 @@ public record DiaryResponse(
         LocalDateTime createdAt,
         String feedback,
         List<EmotionResponse> emotions,
+        List<UserEmotionResponse> userEmotions,
         List<String> keywords,
         List<RecommendationResponse> recommendations,
         List<String> imageUrls
@@ -36,6 +37,9 @@ public record DiaryResponse(
                 diary.getFeedback(),
                 diary.getEmotions().stream()
                         .map(e -> new EmotionResponse(e.getEmotionName(), e.getScore()))
+                        .toList(),
+                diary.getUserEmotions().stream()
+                        .map(e -> new UserEmotionResponse(e.getEmotionName(), e.getScore(), e.getEmotionOrder()))
                         .toList(),
                 diary.getKeywords().stream()
                         .map(k -> k.getWord())

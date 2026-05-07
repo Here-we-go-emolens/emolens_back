@@ -16,5 +16,6 @@ public record DiaryCreateRequest(
         Weather weather,
         TemplateType templateType,
         boolean isSecret,
-        List<String> imageUrls
+        List<String> imageUrls,
+        List<UserEmotionRequest> userEmotions
 ) {}

@@ -1,6 +1,7 @@
 package hwan.project2.service.diary;
 
 import hwan.project2.domain.diary.Diary;
+import hwan.project2.domain.diary.DiaryUserEmotion;
 import hwan.project2.domain.diary.repo.DiaryRepository;
 import hwan.project2.domain.member.Member;
 import hwan.project2.domain.member.repo.MemberRepository;
@@ -38,6 +39,12 @@ public class DiaryService {
                 .orElseThrow(MemberNotFoundException::new);
         Diary diary = Diary.create(member, req.title(), req.content(),
                 req.diaryDate(), req.weather(), req.templateType(), req.isSecret());
+        if (req.userEmotions() != null && !req.userEmotions().isEmpty()) {
+            List<DiaryUserEmotion> userEmotions = req.userEmotions().stream()
+                    .map(e -> DiaryUserEmotion.create(diary, e.emotion(), e.score(), e.order()))
+                    .toList();
+            diary.addUserEmotions(userEmotions);
+        }
         if (req.imageUrls() != null && !req.imageUrls().isEmpty()) {
             diary.addImages(req.imageUrls());
         }
