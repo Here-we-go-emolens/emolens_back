@@ -67,10 +67,22 @@ public class ChatService {
         }
 
         List<Map<String, String>> openAiMessages = new ArrayList<>();
-        openAiMessages.add(Map.of("role", "system", "content", CHAT_SYSTEM_PROMPT));
+        openAiMessages.add(Map.of("role", "system", "content", buildSystemPrompt(memberId)));
         openAiMessages.addAll(buildCompressedMessages(messages));
 
         return openAiClient.chat(openAiMessages);
+    }
+
+    private String buildSystemPrompt(Long memberId) {
+        return characterRepository.findByMemberId(memberId)
+                .map(c -> String.format(
+                        "당신은 사용자의 감정 일기 AI 친구입니다. 이름은 '%s'이고, 성격은 %s, 말투는 %s입니다. " +
+                        "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
+                        "대화는 짧고 따뜻하게 유지하며, 질문은 한 번에 하나만 하세요.",
+                        c.getName(), c.getPersonality().getDescription(), c.getTone().getDescription()))
+                .orElse("당신은 사용자의 감정 일기 AI 친구입니다. " +
+                        "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
+                        "대화는 짧고 따뜻하게 유지하며, 질문은 한 번에 하나만 하세요.");
     }
 
     private List<Map<String, String>> buildCompressedMessages(List<ChatMessageDto> messages) {
