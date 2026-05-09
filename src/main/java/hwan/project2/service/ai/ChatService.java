@@ -75,7 +75,7 @@ public class ChatService {
     }
 
     private String buildSystemPrompt(Long memberId) {
-        return characterRepository.findByMemberId(memberId)
+        String base = characterRepository.findByMemberId(memberId)
                 .map(c -> String.format(
                         "당신은 사용자의 감정 일기 AI 친구입니다. 이름은 '%s'이고, 성격은 %s, 말투는 %s입니다. " +
                         "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
@@ -84,6 +84,16 @@ public class ChatService {
                 .orElse("당신은 사용자의 감정 일기 AI 친구입니다. " +
                         "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
                         "대화는 짧고 따뜻하게 유지하며, 질문은 한 번에 하나만 하세요.");
+
+        LocalDate start = YearMonth.now().atDay(1);
+        LocalDate end = YearMonth.now().atEndOfMonth();
+        int diaryCount = statsQueryService.countDiaries(memberId, start, end);
+
+        if (diaryCount == 0) return base;
+
+        String stats = statsQueryService.buildMonthSummaryText(memberId, start, end);
+        return base + "\n\n[사용자의 이번 달 감정 데이터]\n" + stats +
+               "이 데이터를 참고해 대화 중 자연스럽게 사용자의 감정 패턴을 언급해주세요.";
     }
 
     private List<Map<String, String>> buildCompressedMessages(List<ChatMessageDto> messages) {

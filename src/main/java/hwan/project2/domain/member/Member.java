@@ -41,6 +41,10 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Plan plan = Plan.FREE;
+
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int chatUsed = 0;
 
@@ -108,6 +112,14 @@ public class Member extends BaseTimeEntity {
 
     public void changeRole(Role role) {
         this.role = role;
+    }
+
+    public void upgradeToPremium() {
+        this.plan = Plan.PREMIUM;
+    }
+
+    public void downgradeToFree() {
+        this.plan = Plan.FREE;
     }
 
     public void suspend() {

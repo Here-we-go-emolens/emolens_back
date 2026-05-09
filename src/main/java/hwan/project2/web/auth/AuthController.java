@@ -61,6 +61,7 @@ public class AuthController {
                 member.getName(),
                 member.getTag(),
                 member.getRole().name(),
+                member.getPlan().name(),
                 member.getProfileImageUrl(),
                 member.getChatUsed(),
                 member.getChatLimit()

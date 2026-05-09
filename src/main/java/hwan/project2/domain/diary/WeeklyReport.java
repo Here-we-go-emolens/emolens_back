@@ -41,6 +41,7 @@ public class WeeklyReport {
 
     private String searchKeyword; // 외부 API 검색용 (예: "Frank Ocean 잔잔한 곡")
 
+    @Column(name = "is_action_completed")
     private boolean isActionCompleted; // 사용자가 추천 행동을 수행했는지 (피드백 루프용)
 
     private LocalDateTime createdAt; // 배치 작업이 실행되어 리포트가 생성된 시간
@@ -59,6 +60,10 @@ public class WeeklyReport {
         report.recommendationMessage = recommendationMessage;
         report.searchKeyword = searchKeyword;
         return report;
+    }
+
+    public void completeAction() {
+        this.isActionCompleted = true;
     }
 
     @PrePersist
