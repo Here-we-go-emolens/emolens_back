@@ -10,7 +10,8 @@ public record LetterListItemResponse(
         LetterType type,
         boolean isRead,
         LocalDateTime deliverAt,
-        Long diaryId
+        Long diaryId,
+        String diaryTitle
 ) {
     public static LetterListItemResponse from(Letter letter) {
         return new LetterListItemResponse(
@@ -18,7 +19,8 @@ public record LetterListItemResponse(
                 letter.getType(),
                 letter.isRead(),
                 letter.getDeliverAt(),
-                letter.getDiary() != null ? letter.getDiary().getId() : null
+                letter.getDiary() != null ? letter.getDiary().getId() : null,
+                letter.getDiary() != null ? letter.getDiary().getTitle() : null
         );
     }
 }
