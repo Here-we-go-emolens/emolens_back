@@ -2,15 +2,15 @@ package hwan.project2.web.user;
 
 import hwan.project2.security.UserPrincipal;
 import hwan.project2.service.auth.AuthService;
+import hwan.project2.web.dto.ChangePasswordRequest;
 import hwan.project2.web.dto.UpdateProfileRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,5 +25,37 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest req) {
         authService.updateProfile(principal.getId(), req.name(), req.profileImageUrl());
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ChangePasswordRequest req) {
+        authService.changePassword(principal.getId(), req.currentPassword(), req.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> withdraw(
+            @AuthenticationPrincipal UserPrincipal principal,
+            HttpServletRequest request) {
+        String token = resolveToken(request);
+        authService.withdraw(principal.getId(), token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/plan/upgrade")
+    public ResponseEntity<Void> upgradePlan(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        authService.upgradePlan(principal.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return "";
     }
 }

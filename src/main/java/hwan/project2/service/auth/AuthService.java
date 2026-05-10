@@ -144,6 +144,38 @@ public class AuthService {
         }
     }
 
+    @Transactional
+    public void changePassword(Long memberId, String currentPassword, String newPassword) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+        if (!member.hasPassword()) {
+            throw new InvalidCredentialsException();
+        }
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
+        member.changePassword(passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public void withdraw(Long memberId, String accessToken) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+        member.deleteSoft();
+        redis.delete(refreshKey(memberId));
+        long remainMs = jwtTokenProvider.getRemainingExpirationMs(accessToken);
+        if (remainMs > 0) {
+            redis.opsForValue().set("BL:" + accessToken, "withdraw", Duration.ofMillis(remainMs));
+        }
+    }
+
+    @Transactional
+    public void upgradePlan(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+        member.upgradeToPremium();
+    }
+
     private String refreshKey(Long memberId) {
         return "RT:" + memberId;
     }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,11 +50,13 @@ public class CommunityPostService {
         List<Long> ids = posts.stream().map(CommunityPost::getId).toList();
         Map<Long, Map<ReactionType, Long>> reactionMap = buildReactionMap(ids);
         Map<Long, Long> commentCountMap = buildCommentCountMap(ids);
+        Map<Long, Set<String>> myReactionMap = buildMyReactionMap(ids, memberId);
 
         return posts.map(p -> PostListItemResponse.of(
                 p,
                 memberId,
                 reactionMap.getOrDefault(p.getId(), Map.of()),
+                myReactionMap.getOrDefault(p.getId(), Set.of()),
                 commentCountMap.getOrDefault(p.getId(), 0L)
         ));
     }
@@ -64,12 +67,14 @@ public class CommunityPostService {
                 .orElseThrow(PostNotFoundException::new);
 
         Map<Long, Map<ReactionType, Long>> reactionMap = buildReactionMap(List.of(postId));
+        Map<Long, Set<String>> myReactionMap = buildMyReactionMap(List.of(postId), memberId);
         long commentCount = commentRepository.countByPostId(postId);
 
         return PostResponse.of(
                 post,
                 memberId,
                 reactionMap.getOrDefault(postId, Map.of()),
+                myReactionMap.getOrDefault(postId, Set.of()),
                 commentCount
         );
     }
@@ -103,6 +108,19 @@ public class CommunityPostService {
                         Collectors.toMap(
                                 CommunityReactionRepository.ReactionCountView::getReactionType,
                                 CommunityReactionRepository.ReactionCountView::getCount
+                        )
+                ));
+    }
+
+    private Map<Long, Set<String>> buildMyReactionMap(List<Long> postIds, Long memberId) {
+        if (postIds.isEmpty() || memberId == null) return Map.of();
+        return reactionRepository.findMyActiveReactions(postIds, memberId)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        CommunityReactionRepository.MyReactionView::getPostId,
+                        Collectors.mapping(
+                                v -> v.getReactionType().name().toLowerCase(),
+                                Collectors.toSet()
                         )
                 ));
     }

@@ -6,6 +6,7 @@ import hwan.project2.domain.community.ReactionType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public record PostListItemResponse(
         Long id,
@@ -19,12 +20,14 @@ public record PostListItemResponse(
         boolean isMine,
         long commentCount,
         Map<String, Long> reactions,
+        Set<String> myReactions,
         double similarity
 ) {
     public static PostListItemResponse of(
             CommunityPost post,
             Long currentMemberId,
             Map<ReactionType, Long> reactions,
+            Set<String> myReactions,
             long commentCount
     ) {
         String preview = post.getContent().length() > 100
@@ -47,6 +50,7 @@ public record PostListItemResponse(
                         "comfort",    reactions.getOrDefault(ReactionType.COMFORT, 0L),
                         "understand", reactions.getOrDefault(ReactionType.UNDERSTAND, 0L)
                 ),
+                myReactions,
                 0.0
         );
     }

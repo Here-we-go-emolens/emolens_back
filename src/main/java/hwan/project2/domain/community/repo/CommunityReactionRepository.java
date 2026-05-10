@@ -30,4 +30,18 @@ public interface CommunityReactionRepository extends JpaRepository<CommunityReac
 
     @Query("SELECT COUNT(r) FROM CommunityReaction r WHERE r.post.id = :postId AND r.reactionType = :type AND r.deletedAt IS NULL")
     long countActiveByPostIdAndType(@Param("postId") Long postId, @Param("type") ReactionType type);
+
+    interface MyReactionView {
+        Long getPostId();
+        ReactionType getReactionType();
+    }
+
+    @Query("""
+            SELECT r.post.id AS postId, r.reactionType AS reactionType
+            FROM CommunityReaction r
+            WHERE r.post.id IN :postIds AND r.member.id = :memberId AND r.deletedAt IS NULL
+            """)
+    List<MyReactionView> findMyActiveReactions(
+            @Param("postIds") List<Long> postIds,
+            @Param("memberId") Long memberId);
 }
