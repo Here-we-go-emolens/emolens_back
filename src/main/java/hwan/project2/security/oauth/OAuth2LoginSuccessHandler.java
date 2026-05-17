@@ -32,6 +32,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${app.mobile-redirect-url:emolens://oauth/callback}")
+    private String mobileRedirectUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -46,7 +49,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtTokenProvider.createRefreshToken(memberPrincipal.getId());
         redis.opsForValue().set("RT:" + memberPrincipal.getId(), refreshToken, Duration.ofSeconds(refreshExpSeconds));
 
-        response.sendRedirect(frontendUrl + "/oauth/callback?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean isMobile = session != null && "mobile".equals(session.getAttribute("oauth_source"));
+        if (isMobile) session.removeAttribute("oauth_source");
+
+        String targetUrl = isMobile
+                ? mobileRedirectUrl + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken
+                : frontendUrl + "/oauth/callback?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
+        response.sendRedirect(targetUrl);
     }
 
     private OAuth2MemberPrincipal resolvePrincipal(Authentication authentication) {
