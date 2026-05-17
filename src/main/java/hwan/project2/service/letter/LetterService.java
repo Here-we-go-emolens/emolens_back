@@ -7,10 +7,12 @@ import hwan.project2.domain.diary.repo.DiaryRepository;
 import hwan.project2.domain.letter.Letter;
 import hwan.project2.domain.letter.repo.LetterRepository;
 import hwan.project2.exception.letter.LetterNotFoundException;
+import hwan.project2.service.notification.LetterCreatedEvent;
 import hwan.project2.web.dto.letter.LetterListItemResponse;
 import hwan.project2.web.dto.letter.LetterResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class LetterService {
     private final DiaryRepository diaryRepository;
     private final CharacterRepository characterRepository;
     private final LetterGenerationService letterGenerationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<LetterListItemResponse> getAvailableLetters(Long memberId) {
@@ -87,8 +90,9 @@ public class LetterService {
             String content = letterGenerationService.generate(diary, character);
             LocalDateTime deliverAt = LocalDate.now().plusDays(1).atTime(9, 0);
             Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, deliverAt);
-            letterRepository.save(letter);
+            Letter saved = letterRepository.save(letter);
             log.info("일기 답장 편지 생성 완료: diaryId={}, deliverAt={}", diaryId, deliverAt);
+            eventPublisher.publishEvent(new LetterCreatedEvent(saved.getId(), memberId));
         } catch (Exception e) {
             log.error("편지 생성 중 오류 발생: diaryId={}", diaryId, e);
         }

@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
+                // SSE: EventSource는 커스텀 헤더 불가 → 토큰을 쿼리 파라미터로 수신, 컨트롤러에서 직접 검증
+                .requestMatchers("/api/notifications/stream").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

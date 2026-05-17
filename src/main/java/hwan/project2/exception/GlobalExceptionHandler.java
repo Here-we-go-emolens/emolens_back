@@ -20,6 +20,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -99,6 +100,13 @@ public class GlobalExceptionHandler {
         log.warn("Redis unavailable: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(ErrorResponse.of("REDIS_UNAVAILABLE", "Temporary server issue. Please retry later."));
+    }
+
+    // RuntimeException catch-all보다 먼저 선언해야 우선 적용됨
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> responseStatusException(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode())
+                .body(ErrorResponse.of("ERROR", e.getReason() != null ? e.getReason() : e.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)

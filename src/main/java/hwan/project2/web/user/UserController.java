@@ -2,8 +2,11 @@ package hwan.project2.web.user;
 
 import hwan.project2.security.UserPrincipal;
 import hwan.project2.service.auth.AuthService;
+import hwan.project2.service.notification.NotificationService;
 import hwan.project2.web.dto.ChangePasswordRequest;
 import hwan.project2.web.dto.UpdateProfileRequest;
+import hwan.project2.web.dto.notification.NotificationSettingsResponse;
+import hwan.project2.web.dto.notification.NotificationSettingsUpdateRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final AuthService authService;
+    private final NotificationService notificationService;
 
     @PatchMapping("/profile")
     public ResponseEntity<Void> updateProfile(
@@ -48,6 +52,20 @@ public class UserController {
     public ResponseEntity<Void> upgradePlan(
             @AuthenticationPrincipal UserPrincipal principal) {
         authService.upgradePlan(principal.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/notification-settings")
+    public ResponseEntity<NotificationSettingsResponse> getNotificationSettings(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(notificationService.getSettings(principal.getId()));
+    }
+
+    @PatchMapping("/notification-settings")
+    public ResponseEntity<Void> updateNotificationSettings(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody NotificationSettingsUpdateRequest req) {
+        notificationService.updateSettings(principal.getId(), req);
         return ResponseEntity.ok().build();
     }
 

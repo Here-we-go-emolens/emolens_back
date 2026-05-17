@@ -12,8 +12,10 @@ import hwan.project2.domain.letter.Letter;
 import hwan.project2.domain.letter.repo.LetterRepository;
 import hwan.project2.domain.member.Member;
 import hwan.project2.service.ai.OpenAiClient;
+import hwan.project2.service.notification.WeeklyReportCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +48,7 @@ public class WeeklyReportGenerationService {
     private final WeeklyReportRepository weeklyReportRepository;
     private final LetterRepository letterRepository;
     private final OpenAiClient openAiClient;
+    private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void generate(Long memberId, LocalDate startDate, LocalDate endDate) {
@@ -86,6 +89,7 @@ public class WeeklyReportGenerationService {
             LocalDateTime deliverAt = endDate.plusDays(1).atTime(9, 0); // 월요일 09:00
             Letter letter = Letter.ofWeeklyReport(member, buildLetterContent(report), deliverAt);
             letterRepository.save(letter);
+            eventPublisher.publishEvent(new WeeklyReportCreatedEvent(memberId));
 
             log.info("주간 리포트 생성 완료: memberId={}, period={} ~ {}", memberId, startDate, endDate);
         } catch (Exception e) {

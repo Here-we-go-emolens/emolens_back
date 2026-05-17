@@ -51,6 +51,18 @@ public class Member extends BaseTimeEntity {
     @Column(length = 7)
     private String chatMonth;
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean notifyDailyReminder = true;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean notifyAiAnalysis = true;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean notifyWeeklyReport = false;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean notifyFriendActivity = false;
+
     public static Member createLocal(String name, String tag, String email, String encodedPassword, String profileImageUrl) {
         Member member = new Member();
         member.name = name;
@@ -121,6 +133,14 @@ public class Member extends BaseTimeEntity {
 
     public void downgradeToFree() {
         this.plan = Plan.FREE;
+    }
+
+    public void updateNotificationSettings(boolean dailyReminder, boolean aiAnalysis,
+                                           boolean weeklyReport, boolean friendActivity) {
+        this.notifyDailyReminder = dailyReminder;
+        this.notifyAiAnalysis = aiAnalysis;
+        this.notifyWeeklyReport = weeklyReport;
+        this.notifyFriendActivity = friendActivity;
     }
 
     public void suspend() {
