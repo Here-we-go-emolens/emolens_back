@@ -33,6 +33,9 @@ server:
         same-site: lax
 
 spring:
+  profiles:
+    active: local
+
   servlet:
     multipart:
       max-file-size: 10MB
