@@ -32,8 +32,13 @@ public class MonthlyInsightGenerationService {
     public void generate(Long memberId, YearMonth yearMonth) {
         String ym = yearMonth.toString();
         if (monthlyInsightRepository.existsByMemberIdAndYearMonth(memberId, ym)) {
-            log.debug("월간 인사이트 이미 존재: memberId={}, yearMonth={}", memberId, ym);
-            return;
+            if (!yearMonth.equals(YearMonth.now())) {
+                // 과거 달은 이미 확정된 데이터이므로 재생성 불필요
+                log.debug("월간 인사이트 이미 존재 (과거): memberId={}, yearMonth={}", memberId, ym);
+                return;
+            }
+            // 이번 달은 일기가 추가될수록 갱신
+            monthlyInsightRepository.deleteByMemberIdAndYearMonth(memberId, ym);
         }
 
         Member member = memberRepository.findById(memberId).orElse(null);
