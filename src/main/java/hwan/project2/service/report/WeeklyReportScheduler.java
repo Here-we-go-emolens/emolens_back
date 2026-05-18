@@ -21,7 +21,7 @@ public class WeeklyReportScheduler {
     private final WeeklyReportGenerationService weeklyReportGenerationService;
 
     // 매주 일요일 자정 실행
-    @Scheduled(cron = "0 0 0 * * SUN")
+    @Scheduled(cron = "0 0 0 * * SUN", zone = "Asia/Seoul")
     public void generateWeeklyReports() {
         LocalDate today = LocalDate.now(); // 일요일
         LocalDate startDate = today.with(DayOfWeek.MONDAY);

@@ -28,7 +28,7 @@ public class DailyReminderScheduler {
     private final LetterRepository letterRepository;
 
     // 매일 저녁 8시 실행
-    @Scheduled(cron = "0 0 20 * * *")
+    @Scheduled(cron = "0 0 20 * * *", zone = "Asia/Seoul")
     @Transactional
     public void sendDailyReminders() {
         List<Member> targets = memberRepository.findByStatusAndNotifyDailyReminderTrue(MemberStatus.ACTIVE);
@@ -53,7 +53,7 @@ public class DailyReminderScheduler {
     }
 
     // 매일 오전 9시: 오늘 배달될 편지 알림 발송
-    @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     @Transactional
     public void sendLetterDeliveryNotifications() {
         LocalDateTime start = LocalDate.now().atTime(9, 0);

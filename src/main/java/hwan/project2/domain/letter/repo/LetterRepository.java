@@ -2,6 +2,8 @@ package hwan.project2.domain.letter.repo;
 
 import hwan.project2.domain.letter.Letter;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +19,11 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     Optional<Letter> findByIdAndMemberId(Long id, Long memberId);
 
-    // 09:00 스케줄러용: 특정 시간대에 배달되는 편지 전체
-    List<Letter> findByDeliverAtBetween(LocalDateTime start, LocalDateTime end);
+    // 09:00 스케줄러용: member fetch join으로 N+1 방지
+    @Query("SELECT l FROM Letter l JOIN FETCH l.member WHERE l.deliverAt BETWEEN :start AND :end")
+    List<Letter> findByDeliverAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // dev용: 아직 배달되지 않은(미래 deliverAt) 편지
-    List<Letter> findByMemberIdAndDeliverAtAfter(Long memberId, LocalDateTime now);
+    // dev용: 아직 배달되지 않은(미래 deliverAt) 편지 — member fetch join
+    @Query("SELECT l FROM Letter l JOIN FETCH l.member WHERE l.member.id = :memberId AND l.deliverAt > :now")
+    List<Letter> findByMemberIdAndDeliverAtAfter(@Param("memberId") Long memberId, @Param("now") LocalDateTime now);
 }

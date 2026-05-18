@@ -32,7 +32,7 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom {
                 .leftJoin(diary.emotions, emotion).fetchJoin()
                 .where(diary.id.eq(diaryId)
                         .and(diary.member.id.eq(memberId)))
-                .fetchFirst();
+                .fetchOne(); // PK 필터라 항상 0~1개 → fetchFirst()의 LIMIT 1 불필요, HHH90003004 경고 제거
 
         return Optional.ofNullable(result);
     }

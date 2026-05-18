@@ -26,7 +26,7 @@ public class MonthlyInsightScheduler {
     private final StatsService statsService;
 
     // 매월 1일 오전 9시 실행 (전달 분석)
-    @Scheduled(cron = "0 0 9 1 * *")
+    @Scheduled(cron = "0 0 9 1 * *", zone = "Asia/Seoul")
     public void generateMonthlyInsights() {
         generateMonthlyInsightsFor(YearMonth.now().minusMonths(1));
     }
