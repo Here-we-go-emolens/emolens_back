@@ -9,6 +9,7 @@ import hwan.project2.domain.member.repo.MemberRepository;
 import hwan.project2.service.diary.DiaryService;
 import hwan.project2.service.stats.StatsQueryService;
 import hwan.project2.web.dto.chat.ChatMessageDto;
+import hwan.project2.web.dto.chat.ChatPreviewResponse;
 import hwan.project2.web.dto.diary.DiaryCreateRequest;
 import hwan.project2.web.dto.stats.StatsResponse.EmotionShare;
 import hwan.project2.web.dto.stats.StatsResponse.KeywordStat;
@@ -130,17 +131,35 @@ public class ChatService {
         return Map.of("role", msg.role().equals("ai") ? "assistant" : "user", "content", msg.text());
     }
 
-    public Long finish(Long memberId, List<ChatMessageDto> messages) {
+    public ChatPreviewResponse preview(Long memberId, List<ChatMessageDto> messages) {
+        List<Map<String, String>> openAiMessages = buildDiaryGenerationMessages(messages);
+        String json = openAiClient.generateDiary(openAiMessages);
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            return new ChatPreviewResponse(
+                    node.path("title").asText("오늘의 일기"),
+                    node.path("content").asText("")
+            );
+        } catch (Exception e) {
+            log.error("일기 미리보기 생성 실패", e);
+            throw new RuntimeException("일기 미리보기 생성에 실패했습니다.");
+        }
+    }
+
+    private List<Map<String, String>> buildDiaryGenerationMessages(List<ChatMessageDto> messages) {
         List<Map<String, String>> openAiMessages = new ArrayList<>();
         openAiMessages.add(Map.of("role", "system", "content", DIARY_GENERATE_SYSTEM_PROMPT));
-
         StringBuilder conversation = new StringBuilder();
         for (ChatMessageDto msg : messages) {
             String speaker = msg.role().equals("ai") ? "AI" : "나";
             conversation.append(speaker).append(": ").append(msg.text()).append("\n");
         }
         openAiMessages.add(Map.of("role", "user", "content", conversation.toString()));
+        return openAiMessages;
+    }
 
+    public Long finish(Long memberId, List<ChatMessageDto> messages) {
+        List<Map<String, String>> openAiMessages = buildDiaryGenerationMessages(messages);
         String json = openAiClient.generateDiary(openAiMessages);
 
         try {

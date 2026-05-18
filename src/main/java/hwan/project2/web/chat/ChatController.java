@@ -3,6 +3,7 @@ package hwan.project2.web.chat;
 import hwan.project2.security.UserPrincipal;
 import hwan.project2.service.ai.ChatService;
 import hwan.project2.web.dto.chat.ChatFinishRequest;
+import hwan.project2.web.dto.chat.ChatPreviewResponse;
 import hwan.project2.web.dto.chat.ChatRequest;
 import hwan.project2.web.dto.chat.ChatResponse;
 import jakarta.validation.Valid;
@@ -27,6 +28,14 @@ public class ChatController {
             @Valid @RequestBody ChatRequest req) {
         String reply = chatService.reply(principal.getId(), req.messages());
         return new ChatResponse(reply);
+    }
+
+    @PostMapping("/preview")
+    public ResponseEntity<ChatPreviewResponse> preview(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ChatFinishRequest req) {
+        ChatPreviewResponse preview = chatService.preview(principal.getId(), req.messages());
+        return ResponseEntity.ok(preview);
     }
 
     @PostMapping("/finish")
