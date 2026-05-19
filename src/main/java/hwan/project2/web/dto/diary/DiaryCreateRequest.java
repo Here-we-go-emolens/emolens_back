@@ -11,7 +11,7 @@ import java.util.List;
 
 public record DiaryCreateRequest(
         @NotBlank @Size(max = 100) String title,
-        @NotBlank String content,
+        @NotBlank @Size(min = 10, message = "일기 내용은 최소 10자 이상 입력해주세요.") String content,
         @NotNull LocalDate diaryDate,
         Weather weather,
         TemplateType templateType,
