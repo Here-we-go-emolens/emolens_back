@@ -5,5 +5,6 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateProfileRequest(
         @NotBlank @Size(max = 20) String name,
+        @Size(max = 200) String bio,
         String profileImageUrl
 ) {}

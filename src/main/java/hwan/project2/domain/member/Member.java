@@ -33,6 +33,9 @@ public class Member extends BaseTimeEntity {
     @Column(length = 500)
     private String profileImageUrl;
 
+    @Column(length = 200)
+    private String bio;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MemberStatus status;
@@ -109,6 +112,10 @@ public class Member extends BaseTimeEntity {
 
     public void updateName(String name) {
         this.name = name;
+    }
+
+    public void updateBio(String bio) {
+        this.bio = bio;
     }
 
     public void updateProfileImage(String profileImageUrl) {

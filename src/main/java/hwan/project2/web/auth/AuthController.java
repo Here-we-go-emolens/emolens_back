@@ -59,6 +59,7 @@ public class AuthController {
                 member.getId(),
                 member.getEmail(),
                 member.getName(),
+                member.getBio(),
                 member.getTag(),
                 member.getRole().name(),
                 member.getPlan().name(),
