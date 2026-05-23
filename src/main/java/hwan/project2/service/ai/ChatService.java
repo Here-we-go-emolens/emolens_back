@@ -59,11 +59,12 @@ public class ChatService {
                 .orElseThrow(() -> new RuntimeException("Member not found: " + memberId));
 
         String currentMonth = YearMonth.now().toString();
-        // 첫 번째 메시지(새 세션 시작)일 때만 횟수 차감
-        boolean isNewSession = messages.size() == 1;
+        // 첫 번째 user 메시지(새 세션 시작)일 때만 횟수 차감
+        long userMessageCount = messages.stream().filter(m -> "user".equals(m.role())).count();
+        boolean isNewSession = userMessageCount == 1;
         if (isNewSession) {
             if (member.isChatLimitExceeded(currentMonth)) {
-                return "이번 달 AI 대화 횟수(월 5회)를 모두 사용했어요. 다음 달에 다시 만나요!";
+                return "이번 달 AI 대화 횟수(월 10회)를 모두 사용했어요. 다음 달에 다시 만나요!";
             }
             member.incrementChatUsed(currentMonth);
         }

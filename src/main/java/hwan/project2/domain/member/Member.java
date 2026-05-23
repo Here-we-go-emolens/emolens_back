@@ -99,7 +99,7 @@ public class Member extends BaseTimeEntity {
     }
 
     public int getChatLimit() {
-        return plan == Plan.PREMIUM ? -1 : 5;
+        return plan == Plan.PREMIUM ? -1 : 10;
     }
 
     public boolean isChatLimitExceeded(String currentMonth) {
