@@ -7,7 +7,11 @@ import hwan.project2.domain.member.Member;
 import hwan.project2.domain.member.repo.MemberRepository;
 import hwan.project2.exception.auth.MemberNotFoundException;
 import hwan.project2.exception.diary.DiaryNotFoundException;
+import hwan.project2.service.ai.DiaryAnalysisService;
 import hwan.project2.service.ai.DiaryCreatedEvent;
+import hwan.project2.domain.diary.AnalysisStatus;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import hwan.project2.web.dto.diary.DiaryCreateRequest;
 import hwan.project2.web.dto.diary.DiaryListItemResponse;
 import hwan.project2.web.dto.diary.DiaryResponse;
@@ -32,6 +36,7 @@ public class DiaryService {
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final StatsService statsService;
+    private final DiaryAnalysisService diaryAnalysisService;
 
     @Transactional
     public Long createDiary(Long memberId, DiaryCreateRequest req) {
@@ -86,5 +91,14 @@ public class DiaryService {
                 .orElseThrow(DiaryNotFoundException::new);
         diaryRepository.delete(diary);
         statsService.evictCache(memberId);
+    }
+
+    @Transactional
+    public void reAnalyzeDiary(Long memberId, Long diaryId) {
+        Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId)
+                .orElseThrow(DiaryNotFoundException::new);
+        diary.resetForReAnalysis();
+        // commit happens after @Transactional exits, then async retryAnalyze picks up PENDING status
+        diaryAnalysisService.retryAnalyze(diaryId);
     }
 }

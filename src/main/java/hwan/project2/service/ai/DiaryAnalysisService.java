@@ -110,6 +110,7 @@ public class DiaryAnalysisService {
         runAnalysis(diaryId);
     }
 
+
     private void runAnalysis(Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId).orElse(null);
         if (diary == null) {

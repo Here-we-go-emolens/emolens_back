@@ -138,6 +138,14 @@ public class Diary {
         this.status = AnalysisStatus.FAILED;
     }
 
+    public void resetForReAnalysis() {
+        this.emotions.clear();
+        this.keywords.clear();
+        this.recommendations.clear();
+        this.feedback = null;
+        this.status = AnalysisStatus.PENDING;
+    }
+
     @PrePersist
     private void prePersist() {
         this.createdAt = LocalDateTime.now();

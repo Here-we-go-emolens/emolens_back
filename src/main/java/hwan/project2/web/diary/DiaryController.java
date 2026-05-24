@@ -61,4 +61,12 @@ public class DiaryController {
         diaryService.deleteDiary(principal.getId(), diaryId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{diaryId}/reanalyze")
+    public ResponseEntity<Void> reanalyze(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long diaryId) {
+        diaryService.reAnalyzeDiary(principal.getId(), diaryId);
+        return ResponseEntity.ok().build();
+    }
 }
